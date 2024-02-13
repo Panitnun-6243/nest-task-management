@@ -16,4 +16,13 @@ export class TaskService {
     await this.taskRepository.save(task);
     return task;
   }
+  async getTasks(): Promise<Task[]> {
+    const tasks = await this.taskRepository.find();
+    return tasks;
+  }
+
+  async getTaskById(id: string): Promise<Task> {
+    const task = await this.taskRepository.findOneBy({ id: id });
+    return task;
+  }
 }
