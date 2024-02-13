@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TaskRepository } from './task.repository';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -13,16 +13,28 @@ export class TaskService {
       title,
       description,
     });
-    await this.taskRepository.save(task);
-    return task;
+    try {
+      await this.taskRepository.save(task);
+      return task;
+    } catch (error) {
+      throw new ConflictException('Task already exists');
+    }
   }
   async getTasks(): Promise<Task[]> {
-    const tasks = await this.taskRepository.find();
-    return tasks;
+    try {
+      const tasks = await this.taskRepository.find();
+      return tasks;
+    } catch (error) {
+      throw new HttpException('Tasks not found', 404);
+    }
   }
 
   async getTaskById(id: string): Promise<Task> {
-    const task = await this.taskRepository.findOneBy({ id: id });
-    return task;
+    try {
+      const task = await this.taskRepository.findOneBy({ id: id });
+      return task;
+    } catch (error) {
+      throw new HttpException('Task not found', 404);
+    }
   }
 }
