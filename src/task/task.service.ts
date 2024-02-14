@@ -1,11 +1,13 @@
-import { ConflictException, HttpException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TaskRepository } from './task.repository';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { Task } from './task.entity';
+import { NotFoundException } from 'src/exception/not-found.exception';
 
 @Injectable()
 export class TaskService {
+  private logger = new Logger(TaskService.name);
   constructor(@InjectRepository(Task) private taskRepository: TaskRepository) {}
   async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
     const { title, description } = createTaskDto;
@@ -25,7 +27,7 @@ export class TaskService {
       const tasks = await this.taskRepository.find();
       return tasks;
     } catch (error) {
-      throw new HttpException('Tasks not found', 404);
+      throw new NotFoundException('Tasks not found');
     }
   }
 
@@ -34,7 +36,7 @@ export class TaskService {
       const task = await this.taskRepository.findOneBy({ id: id });
       return task;
     } catch (error) {
-      throw new HttpException('Task not found', 404);
+      throw new NotFoundException(`Task with ID ${id} not found.`);
     }
   }
 }
